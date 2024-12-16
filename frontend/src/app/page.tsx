@@ -16,14 +16,19 @@ export default function Home() {
   return (
     <div style={backgroundStyle} className="flex justify-center items-center">
       <div className="w-[75%] h-1/2 flex flex-col justify-center items-center gap-4 lg:gap-8">
-        <span className="text-5xl font-bold">Gerador de atividades escolares</span>
+        <span className="text-5xl font-bold">School Activity Generator</span>
         <div className="flex flex-col gap-2 justify-center items-center">
-          <span className="text-2xl font-bold">Crie atividades escolares com o poder da Inteligência Artificial!</span>
-          <span>Personalize cada atividade escolhendo o tema, objetivos de aprendizagem, série escolar do aluno e a tarefa específica que o aluno deve fazer</span>
+          <span className="text-2xl font-bold">Create school activities with the power of Artificial Intelligence!</span>
+          <span>Customize each activity by selecting the topic, learning objectives and the student's grade level.</span>
         </div>
-        <button onClick={() => router.push('/form')} className="w-48 h-14 px-6 text-base bg-[#87CEEB] rounded-lg font-semibold">
-          Começar
-        </button>
+        <div className="flex gap-4">
+          <button onClick={() => router.push('/form')} className="w-48 h-14 px-6 text-base bg-[#87CEEB] rounded-lg font-semibold">
+            Start
+          </button>
+          <button className="self-center w-48 h-14 px-6 text-base bg-[#87CEEB] rounded-lg font-semibold" type="submit">
+            View generated activities
+          </button>
+        </div>
       </div>
     </div>
   );
