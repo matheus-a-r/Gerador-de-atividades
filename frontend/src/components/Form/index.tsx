@@ -21,6 +21,7 @@ export default function Form(props: Props) {
         ano: "",
         assunto: "",
         tematica:  "",
+        layout: ""
     });
 
     const regen = async () => {
@@ -29,6 +30,7 @@ export default function Form(props: Props) {
             ano: responseData?.params.ano,
             assunto: responseData?.params.assunto,
             tematica: responseData?.params.tematica,
+            layout: responseData?.params.layout,
         };
 
         setLoading(true)
@@ -53,6 +55,7 @@ export default function Form(props: Props) {
             ano: values.ano,
             assunto: values.assunto,
             tematica: values.tematica,
+            layout: values.layout
         };
         
         setLoading(true)
@@ -128,6 +131,19 @@ export default function Form(props: Props) {
                                             required
                                             value={values.tematica} 
                                             onChange={getHandler('tematica')}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="tematica">Layout</label>
+                                        <input
+                                            className="p-4 w-72 bg-gray-100 rounded-lg"
+                                            name="layout"
+                                            placeholder="Two images"
+                                            type="text"
+                                            required
+                                            value={values.layout} 
+                                            onChange={getHandler('layout')}
                                         />
                                     </div>
                                 </div>

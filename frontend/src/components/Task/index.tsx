@@ -44,6 +44,14 @@ export default function Task(props: Props) {
                 );
             });
 
+            const containerDiv = doc.querySelector("div.container");
+            if (containerDiv) {
+                containerDiv.setAttribute(
+                    "style",
+                    "display: flex; justify-content: center; align-items: center; gap: 10px;"
+                );
+            }
+
             setHtml(doc.body.innerHTML);
         }
     }

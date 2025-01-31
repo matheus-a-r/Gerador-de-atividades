@@ -14,4 +14,5 @@ export type FormDataRequest = {
   ano: string;
   assunto: string;
   tematica: string;
+  layout: string
 }
