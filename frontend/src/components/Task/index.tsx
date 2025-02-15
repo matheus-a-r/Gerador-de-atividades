@@ -29,7 +29,6 @@ export default function Task(props: Props) {
             const firstDiv = doc.querySelector("div");
             
             if (firstDiv?.hasAttribute("style")) {
-                // firstDiv.removeAttribute("style");
                 firstDiv.setAttribute(
                     "style",
                     "width: 100%;"
@@ -45,6 +44,7 @@ export default function Task(props: Props) {
             });
 
             const containerDiv = doc.querySelector("div.container");
+            
             if (containerDiv) {
                 containerDiv.setAttribute(
                     "style",
