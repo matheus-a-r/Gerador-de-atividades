@@ -24,8 +24,12 @@ export default function App() {
 
             <div className="w-full h-screen flex bg-slate-200 p-8">
                 <div className="w-full h-full self-center flex flex-col justify-center gap-4">
-                    <div className="w-3/5 h-full mx-auto flex justify-center bg-white p-4">
+                    <div className="w-3/5 h-full mx-auto flex justify-center bg-white p-4 overflow-y-auto overflow-x-hidden">
+                    {loading ?
+                        <Loading />
+                        :
                         <Task data={responseData}/>
+                    }
                     </div>
                 </div>
             </div>
