@@ -32,6 +32,7 @@ export default function Task(props: Props) {
     const [sizes, setSizes] = useState<TagsSize[]>([]);
     const [selectedItem, setSelectedItem] = useState<number>();
 
+    //testes
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Delete' && selectedItem !== null) {
