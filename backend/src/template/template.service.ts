@@ -4,7 +4,10 @@ import { ChatCompletion } from 'openai/resources';
 import { params } from './types';
 import { ConfigService } from '@nestjs/config';
 import { PROMPT } from 'src/constants';
-
+import * as cheerio from 'cheerio';
+import axios from 'axios';
+import * as fs from 'fs';
+import * as path from 'path';
 @Injectable()
 export class TemplateService {
   
@@ -46,14 +49,41 @@ export class TemplateService {
 
       console.log(content)
 
+      const imgPrompt = 'Generate a image '
+
       const splitIndex = content.indexOf("}");
       const jsonString = content.substring(7, splitIndex + 1).trim();
       const cleanedJsonString = jsonString.replace(/\\n/g, "").replace(/\\r/g, "").replace(/\\"/g, "\"");
       const jsonObject = JSON.parse(cleanedJsonString);
       const html = content.match(/<body[^>]*>([\s\S]*?)<\/body>/);
+      console.log(html[1].trim())
+      
+      const $ = cheerio.load(html ? html[1].trim(): '');
 
-      console.log(html)
+      const imgElements = $('img').toArray();
 
+      for (const element of imgElements) {
+        const alt = $(element).attr('alt');
+        if (alt) {
+          try {
+            const response = await this.openai.images.generate({
+              model: "dall-e-3",
+              prompt: imgPrompt + alt,
+              size: "1024x1024",
+              n: 1,
+            });
+            const imageUrl = response.data[0].url;
+
+            const pathImage = await this.downloadImage(imageUrl);
+    
+            $(element).attr('src', `http://localhost:${process.env.PORT ?? 3001}/public/${pathImage}`);
+          } catch (error) {
+            console.error('Erro ao gerar imagem:', error);
+          }
+        }
+      }
+      const newHtml = $.html().toString();
+      console.log(newHtml)
       jsonObject.ano = param.ano;
       jsonObject.assunto = param.assunto;
       jsonObject.tematica = param.tematica;
@@ -61,11 +91,22 @@ export class TemplateService {
       
       return {
         params: jsonObject,
-        html: html ? html[1].trim() : ''
+        html: newHtml
       };
     }catch (e) {
       console.error(e);
       throw new ServiceUnavailableException('Failed request to ChatGPT');
     }
   }
+
+  async downloadImage(url: string) {
+    const fileName = `img-${Date.now()}.png`;
+    const filePath = path.resolve(__dirname, '..', '..', 'public', fileName);
+
+      const response = await axios.get(url, { responseType: 'arraybuffer' });
+
+      fs.writeFileSync(filePath, response.data);
+
+      return fileName;
+    }
 }
