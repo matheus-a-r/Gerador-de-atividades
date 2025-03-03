@@ -2,7 +2,8 @@ import { ResponseTemplate } from "@/types";
 import { useEffect, useState } from "react";
 
 type Props = {
-    data: ResponseTemplate | null
+    data: ResponseTemplate | null;
+    ref: any;
 }
 
 type ImageData = {
@@ -11,12 +12,9 @@ type ImageData = {
   };
 
 export default function Task(props: Props) {
-    const { data } = props;
+    const { data, ref } = props;
 
-    const [html, setHtml] = useState<string | undefined>();
-
-    const [question, setQuestion] = useState<string | undefined>();
-    const [imagesList, setImagesList] = useState<ImageData[]>([]);
+    const [html, setHtml] = useState<string | TrustedHTML>();
 
     useEffect(() => {
         getText(data?.html);
@@ -29,26 +27,17 @@ export default function Task(props: Props) {
             const firstDiv = doc.querySelector("div");
             
             if (firstDiv?.hasAttribute("style")) {
-                // firstDiv.removeAttribute("style");
                 firstDiv.setAttribute(
                     "style",
                     "width: 100%;"
                 );
             }
 
-            doc.querySelectorAll("img").forEach((img) => {
-                img.setAttribute("src", "https://s2-casaejardim.glbimg.com/xdgh9nWSpiINzuJWTRofzTbGKa8=/0x0:1400x933/888x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_a0b7e59562ef42049f4e191fe476fe7d/internal_photos/bs/2023/J/4/f5RFT9TQKFr8LM9TA7hw/cactos-e-flor-de-cactos-gettyimages-1447981386.jpg");
-                img.setAttribute(
-                    "style",
-                    "max-width: 300px;"
-                );
-            });
-
-            const containerDiv = doc.querySelector("div.container");
+            const containerDiv = doc.querySelector("div.activity");
             if (containerDiv) {
                 containerDiv.setAttribute(
                     "style",
-                    "display: flex; justify-content: center; align-items: center; gap: 10px;"
+                    ''
                 );
             }
 
@@ -57,9 +46,9 @@ export default function Task(props: Props) {
     }
     
     return (
-        <div className="flex w-full max-w-6xl">
-                <div className="flex flex-col gap-8">
-                    <div className="self-center" dangerouslySetInnerHTML={{ __html: html }} />
+        <div ref={ref}className="flex w-full text-wrap">
+                <div className="flex flex-col gap-8 text-wrap">
+                    {html && <div className="self-center text-wrap" dangerouslySetInnerHTML={{ __html: html }} />}
                 </div>
         </div>
     )

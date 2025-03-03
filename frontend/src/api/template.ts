@@ -5,3 +5,9 @@ export const generateTemplate = async (data: any) => {
     
     return response
 }
+
+export const generateImage = async (data: any) => {
+    const response = await api.post('/template/image', data)
+    
+    return response
+}

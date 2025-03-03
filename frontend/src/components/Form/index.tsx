@@ -68,6 +68,7 @@ export default function Form(props: Props) {
             setIsSubmitted(true);
         } catch (error: any) {
             console.log(error)
+            setLoading(false)
         }
         finally {
             setLoading(false)
