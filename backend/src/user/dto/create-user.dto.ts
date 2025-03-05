@@ -15,4 +15,8 @@ export class CreateUserDto {
     @IsNotEmpty()
     @MinLength(6)
     password: string;
+
+    @ApiProperty({ description: 'User phone', example: '99999999999' })
+    @IsNotEmpty()
+    phone: string;
 }

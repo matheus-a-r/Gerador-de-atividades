@@ -39,18 +39,27 @@ export class AuthService {
   async loginUser(
     email: string,
     password: string,
-  ): Promise<{ token: string; userResponse: ResponseUserDto }> {
-    const user = await this.userService.findByEmail(email);
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const token = this.jwtService.sign({
-        name: user.name,
-        sub: user.id,
-      });
-      const userResponse = { id: user.id, name: user.name, email:user.email }
-
-      return { token,  userResponse};
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    userResponse: ResponseUserDto;
+  }> {
+    let user;
+    try {
+      user = await this.userService.findByEmail(email);
+    } catch (error) {
+      throw new UnauthorizedException('Email não cadastrado.');
     }
-    throw new UnauthorizedException('Invalid credentials');
+
+    if (user && (await bcrypt.compare(password, user.password))) {
+      const accessToken = this.generateAccessToken(user.id);
+
+      const refreshToken = this.generateRefreshToken(user.id);
+      const userResponse = user;
+
+      return { accessToken, refreshToken, userResponse };
+    }
+    throw new UnauthorizedException('Credenciais inválidas.');
   }
 
   async logout(token: string, exp: number): Promise<void> {
@@ -61,17 +70,15 @@ export class AuthService {
 
   async registerUser(
     createUserDto: CreateUserDto,
-  ): Promise<{ token: string; userResponse: ResponseUserDto }> {
+  ): Promise<{ accessToken: string; refreshToken: string; userResponse: ResponseUserDto }> {
     const user = await this.userService.create({ ...createUserDto });
 
-    const token = this.jwtService.sign({
-      name: user.name,
-      sub: user.id,
-    });
+    const accessToken = this.generateAccessToken(user.id);
+    const refreshToken = this.generateRefreshToken(user.id);
 
-    const userResponse = {id: user.id, name: user.name, email: user.email}
+    const userResponse = {id: user.id, name: user.name, email: user.email, phone: user.phone}
 
-    return { token, userResponse };
+    return { accessToken, refreshToken, userResponse };
   }
 
   async changePassword(id: string, changePasswordDto: ChangePasswordDto): Promise<{message: String}> {
@@ -136,5 +143,19 @@ export class AuthService {
     };
 
     await transporter.sendMail(mailOptions);
+  }
+
+  private generateAccessToken(userId: string): string {
+    return this.jwtService.sign(
+      { sub: userId },
+      { expiresIn: '15m', secret: process.env.JWT_ACCESS_SECRET },
+    );
+  }
+
+  private generateRefreshToken(userId: string): string {
+    return this.jwtService.sign(
+      { sub: userId },
+      { expiresIn: '7d', secret: process.env.JWT_REFRESH_SECRET },
+    );
   }
 }

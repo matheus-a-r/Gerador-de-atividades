@@ -9,7 +9,9 @@ import {
   Param, 
   UnauthorizedException, 
   BadRequestException,
-  NotFoundException
+  NotFoundException,
+  Res,
+  HttpStatus
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
@@ -20,6 +22,7 @@ import { JwtAuthGuard } from './auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { SendTokenDto } from './dto/send-token.dto';
 import { ValidTokenDto } from './dto/valid-token.dto';
+import { Response } from 'express';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -58,14 +61,19 @@ export class AuthController {
       },
     },
   })
-  async loginUser(@Body() loginUserDto: LoginUserDto) {
+  async loginUser(@Body() loginUserDto: LoginUserDto, @Res() response: Response) {
     try {
-      const { token, userResponse } = await this.authService.loginUser(
-        loginUserDto.email,
-        loginUserDto.password,
-      );
-      return { token, user: userResponse };
+      const { email, password } = loginUserDto;
+      const { accessToken, refreshToken, userResponse } =
+        await this.authService.loginUser(email, password);
+        return response.status(HttpStatus.OK).json({
+          message: 'Login efetuado com sucesso.',
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          user: {name: userResponse.name, email: userResponse.email},
+        });
     } catch (error) {
+      console.log(error)
       throw new UnauthorizedException('Invalid credentials.');
     }
   }
@@ -94,6 +102,7 @@ export class AuthController {
             id: { type: 'string', example: 'abc123' },
             name: { type: 'string', example: 'John Doe' },
             email: { type: 'string', example: 'john.doe@example.com' },
+            phone: {type: 'string', example: '99999999999' }
           },
         },
         token: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' },
@@ -111,11 +120,18 @@ export class AuthController {
       } 
     } 
   })
-  async registerUser(@Body() createUserDto: CreateUserDto) {
+  async registerUser(@Body() createUserDto: CreateUserDto, @Res() response: Response) {
     try {
-      const { token, userResponse } = await this.authService.registerUser(createUserDto);
-      return { user: userResponse, token };
+      const { accessToken, refreshToken, userResponse } =
+        await this.authService.registerUser(createUserDto);
+
+      return response.status(HttpStatus.CREATED).json({
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        userResponse: userResponse,
+      });
     } catch (error) {
+      console.log(error)
       throw new BadRequestException('Validation failed.');
     }
   }

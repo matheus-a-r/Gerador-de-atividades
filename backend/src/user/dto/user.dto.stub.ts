@@ -13,6 +13,7 @@ export const CreateUserDtoStub = (): CreateUserDto => {
     return {
         name: "Vinicius Santos de Pontes",
         email: "teste@gmail.com",
-        password: "password123"
+        password: "password123",
+        phone: "999999999"
     };
 };
