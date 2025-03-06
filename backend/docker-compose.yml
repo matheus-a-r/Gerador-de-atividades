@@ -7,6 +7,9 @@ services:
       - MONGO_URI=mongodb://mongo:27017/Gerador
     depends_on:
       - mongo
+    volumes:
+      - .:/app
+      - /app/node_module
     networks:
       - app-network
 

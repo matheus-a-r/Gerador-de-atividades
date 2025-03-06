@@ -6,10 +6,17 @@ import { ConfigService } from '@nestjs/config';
 import { PROMPT } from 'src/constants';
 import * as cheerio from 'cheerio';
 import axios from 'axios';
-import * as fs from 'fs';
-import * as path from 'path';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Template } from './interface/template.interface';
+import { CreateTemplateDto } from './dto/create-template.dto';
+import { Image } from 'src/image/schema/image.schema';
 @Injectable()
 export class TemplateService {
+  
+  @InjectModel('Template') private readonly templateModel: Model<Template>
+
+  @InjectModel('Image') private readonly imageModel: Model<Image>
   
   public openai: OpenAIApi;
   
@@ -22,7 +29,7 @@ export class TemplateService {
   
   }
 
-  async getResponse(param: params) {
+  async getResponse(param: params, user_id: string) {
   
     const para = `
       level: ${param.ano},
@@ -56,12 +63,25 @@ export class TemplateService {
       const cleanedJsonString = jsonString.replace(/\\n/g, "").replace(/\\r/g, "").replace(/\\"/g, "\"");
       const jsonObject = JSON.parse(cleanedJsonString);
       const html = content.match(/<body[^>]*>([\s\S]*?)<\/body>/);
-      console.log(html[1].trim())
+
+      jsonObject.ano = param.ano;
+      jsonObject.assunto = param.assunto;
+      jsonObject.tematica = param.tematica;
+      jsonObject.layout = param.layout;
+      
+      const templateCreated = await this.templateModel.create({
+        level: param.ano,
+        subject: param.assunto,
+        theme: param.tematica,
+        layout: param.layout,
+        html: html ? html[1].trim(): '',
+        user_id: user_id
+      } as CreateTemplateDto)
       
       const $ = cheerio.load(html ? html[1].trim(): '');
-
+      
       const imgElements = $('img').toArray();
-
+      
       for (const element of imgElements) {
         const alt = $(element).attr('alt');
         if (alt) {
@@ -74,21 +94,27 @@ export class TemplateService {
             });
             const imageUrl = response.data[0].url;
 
-            const pathImage = await this.downloadImage(imageUrl);
+            const base64Image = await this.downloadImage(imageUrl);
+
+            const image: Image = await this.imageModel.create({
+              template_id: templateCreated.id,
+              imageUrl: base64Image
+            })
     
-            $(element).attr('src', `http://localhost:${process.env.PORT ?? 3001}/public/${pathImage}`);
+            $(element).attr('src', image.id);
           } catch (error) {
             console.error('Erro ao gerar imagem:', error);
           }
         }
       }
+
       const newHtml = $.html().toString();
-      console.log(newHtml)
-      jsonObject.ano = param.ano;
-      jsonObject.assunto = param.assunto;
-      jsonObject.tematica = param.tematica;
-      jsonObject.layout = param.layout;
-      
+
+      await this.templateModel.findByIdAndUpdate(templateCreated.id, 
+        {...templateCreated, html: newHtml},
+        { new: true }
+      )
+
       return {
         params: jsonObject,
         html: newHtml
@@ -100,13 +126,10 @@ export class TemplateService {
   }
 
   async downloadImage(url: string) {
-    const fileName = `img-${Date.now()}.png`;
-    const filePath = path.resolve(__dirname, '..', '..', 'public', fileName);
 
-      const response = await axios.get(url, { responseType: 'arraybuffer' });
+    const response = await axios.get(url, { responseType: 'arraybuffer' });
+    const base64Image = Buffer.from(response.data);
 
-      fs.writeFileSync(filePath, response.data);
-
-      return fileName;
+    return base64Image;
     }
 }
