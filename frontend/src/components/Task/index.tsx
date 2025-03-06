@@ -1,3 +1,4 @@
+import { getImageById } from "@/api/image";
 import { ResponseTemplate } from "@/types";
 import { useEffect, useState } from "react";
 
@@ -5,11 +6,6 @@ type Props = {
     data: ResponseTemplate | null;
     ref: any;
 }
-
-type ImageData = {
-    alt: string | null;
-    exp: string | null;
-  };
 
 export default function Task(props: Props) {
     const { data, ref } = props;
@@ -20,30 +16,38 @@ export default function Task(props: Props) {
         getText(data?.html);
     }, [data])
     
-    const getText = (html: string | undefined) => {
+    const getText = async (html: string | undefined) => {
         if (html) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const firstDiv = doc.querySelector("div");
-            
-            if (firstDiv?.hasAttribute("style")) {
-                firstDiv.setAttribute(
-                    "style",
-                    "width: 100%;"
-                );
-            }
-
-            const containerDiv = doc.querySelector("div.activity");
-            if (containerDiv) {
-                containerDiv.setAttribute(
-                    "style",
-                    ''
-                );
-            }
-
-            setHtml(doc.body.innerHTML);
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+      
+          const firstDiv = doc.querySelector("div");
+          if (firstDiv?.hasAttribute("style")) {
+            firstDiv.setAttribute("style", "width: 100%;");
+          }
+      
+          const containerDiv = doc.querySelector("div.activity");
+          if (containerDiv) {
+            containerDiv.setAttribute("style", '');
+          }
+      
+          const images = Array.from(doc.querySelectorAll("img"));
+      
+          await Promise.all(
+            images.map(async (img) => {
+              const src = img.getAttribute("src");
+              if (src && !src.startsWith("data:image/")) {
+                const response = await getImageById(src);
+                if (response && response.status === 200) {
+                  img.src = `data:image/png;base64,${response.data.imageUrl}`;
+                }
+              }
+            })
+          );
+      
+          setHtml(doc.body.innerHTML);
         }
-    }
+      }
     
     return (
         <div ref={ref}className="flex w-full text-wrap">

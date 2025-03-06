@@ -36,7 +36,6 @@ export function AuthProvider({ children }: any) {
         const response = await signInRequest(credentials);
 
         if (response && response.status === 200) {
-            console.log(response)
             setCookie(undefined, "nextauth.accessToken", response.data.accessToken);
             setCookie(undefined, "nextauth.refreshToken", response.data.refreshToken);
             setUser(response.data.user);
