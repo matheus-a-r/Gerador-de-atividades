@@ -34,12 +34,12 @@ export function AuthProvider({ children }: any) {
 
     async function signIn(credentials: SignInData) {
         const response = await signInRequest(credentials);
-
+        
         if (response && response.status === 200) {
             setCookie(undefined, "nextauth.accessToken", response.data.accessToken);
             setCookie(undefined, "nextauth.refreshToken", response.data.refreshToken);
             setUser(response.data.user);
-
+            
             router.push("/form");
         }
         return { data: response?.data, status: response?.status };
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: any) {
             setCookie(undefined, "nextauth.accessToken", response.data.accessToken);
             setCookie(undefined, "nextauth.refreshToken", response.data.refreshToken);
             setUser(response.data.userResponse);
-
+            toast.success("User registred")
             router.push("/form");
         }
         return { data: response?.data, status: response?.status };

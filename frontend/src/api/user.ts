@@ -5,12 +5,13 @@ import { UserFormState, SignInRequestData } from "../types"
 
 import router from "next/router";
 import { destroyCookie, parseCookies, setCookie } from "nookies";
+import { toast } from "react-toastify";
 
 export async function signUpRequest(credentials: UserFormState) {
   try {
     return await api.post('/auth/register/user', credentials);
   } catch (error: any) {
-    console.log(error.message)
+    toast.error(error.response.data.message);
   }
 }
 
@@ -18,7 +19,7 @@ export async function signInRequest(credentials: SignInRequestData) {
   try {
     return await api.post('auth/login/user', credentials);
   } catch (error: any) {
-    console.log(error.message)
+    toast.error(error.response.data.message);
   }
 }
 

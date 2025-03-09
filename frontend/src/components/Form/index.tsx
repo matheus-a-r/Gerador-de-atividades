@@ -5,6 +5,7 @@ import Refresh from "../../assets/img/refresh-cw.svg";
 import { div } from "framer-motion/client";
 import { FormDataRequest } from "@/types";
 import { generateTemplate } from "@/api/template";
+import FileInput from "../fileInput";
 
 type Props = {
     setIsSubmitted: any

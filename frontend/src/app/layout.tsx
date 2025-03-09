@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -24,6 +26,7 @@ export default function RootLayout({
           className={`${poppins.className} antialiased`}
         >
           <AuthProvider>
+            <ToastContainer />
             {children} 
           </AuthProvider>
         </body>
