@@ -7,7 +7,6 @@ export class ImageService {
 
   @InjectModel('Image') private readonly imageModel: Model<Image>
   
-
   async findOne(id: string): Promise<Image> {
     const image = await this.imageModel.findById(id);
     console.log()
@@ -17,5 +16,17 @@ export class ImageService {
     }
     
     return image;
+  }
+  async update(id: string, imageBuffer: Buffer): Promise<Image> {
+    const updatedImage = await this.imageModel.findByIdAndUpdate(
+      id,
+      { imageUrl: imageBuffer },
+      { new: true },
+    );
+    console.log(updatedImage)
+    if (!updatedImage) {
+      throw new NotFoundException(`Image with ID ${id} not found`);
+    }
+    return updatedImage;
   }
 }

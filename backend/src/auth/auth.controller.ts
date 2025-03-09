@@ -237,4 +237,38 @@ export class AuthController {
     this.authService.validateToken(validTokenDto.token, true);
     return { message: 'Token is valid.' };
   }
+
+  @Post('refresh')
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({ status: 200, description: 'Token de acesso renovado' })
+  @ApiResponse({ status: 401, description: 'Token inválido.' })
+  @ApiResponse({
+    status: 500,
+    description: 'Erro interno ao renovar o token do usuário.',
+  })
+  async refreshAccessToken(
+    @Body('refreshToken') refreshToken: string,
+    @Res() response: Response,
+  ) {
+    try {
+      const newAccessToken =
+        await this.authService.refreshAccessToken(refreshToken);
+      return response.status(HttpStatus.OK).json({
+        newAccessToken,
+      });
+    } catch (error) {
+      console.error(error);
+      if (error instanceof UnauthorizedException) {
+        return response.status(HttpStatus.UNAUTHORIZED).json({
+          message: error.message || 'Operação não autorizada.',
+        });
+      }
+
+      return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message:
+          'Erro do sistema ao renovar o token do usuário.\nTente novamente mais tarde.',
+        error: error.message || 'Erro interno do servidor',
+      });
+    }
+  }
 }

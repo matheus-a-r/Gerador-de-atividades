@@ -114,6 +114,7 @@ export class AuthService {
       }
       return decoded;
     } catch (error) {
+      console.log(error)
       throw new BadRequestException('Invalid or expired token.');
     }
   }
@@ -157,5 +158,27 @@ export class AuthService {
       { sub: userId },
       { expiresIn: '7d', secret: process.env.JWT_REFRESH_SECRET },
     );
+  }
+
+  async refreshAccessToken(refreshToken: string): Promise<String> {
+    try {
+      const payload = this.jwtService.verify(refreshToken);
+
+      // Valida se o refresh token não está na blacklist
+      const isBlacklisted = await this.isTokenBlacklisted(refreshToken);
+      if (isBlacklisted) {
+        throw new UnauthorizedException('Refresh token inválido');
+      }
+
+      // Cria um novo Access Token
+      const newAccessToken = this.jwtService.sign(
+        { name: payload.name, sub: payload.sub, role: payload.role },
+        { expiresIn: '15m' }, // Access Token válido por 15 minutos
+      );
+
+      return newAccessToken;
+    } catch (error) {
+      throw new UnauthorizedException('Token inválido ou expirado');
+    }
   }
 }
