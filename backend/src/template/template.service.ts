@@ -4,9 +4,19 @@ import { ChatCompletion } from 'openai/resources';
 import { params } from './types';
 import { ConfigService } from '@nestjs/config';
 import { PROMPT } from 'src/constants';
-
+import * as cheerio from 'cheerio';
+import axios from 'axios';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Template } from './interface/template.interface';
+import { CreateTemplateDto } from './dto/create-template.dto';
+import { Image } from 'src/image/schema/image.schema';
 @Injectable()
 export class TemplateService {
+  
+  @InjectModel('Template') private readonly templateModel: Model<Template>
+
+  @InjectModel('Image') private readonly imageModel: Model<Image>
   
   public openai: OpenAIApi;
   
@@ -19,7 +29,7 @@ export class TemplateService {
   
   }
 
-  async getResponse(param: params) {
+  async getResponse(param: params, user_id: string) {
   
     const para = `
       level: ${param.ano},
@@ -44,7 +54,7 @@ export class TemplateService {
 
       const [content] = completion.choices.map((choice) => choice.message.content);
 
-      console.log(content)
+      const imgPrompt = 'Generate a image '
 
       const splitIndex = content.indexOf("}");
       const jsonString = content.substring(7, splitIndex + 1).trim();
@@ -52,20 +62,127 @@ export class TemplateService {
       const jsonObject = JSON.parse(cleanedJsonString);
       const html = content.match(/<body[^>]*>([\s\S]*?)<\/body>/);
 
-      console.log(html)
-
       jsonObject.ano = param.ano;
       jsonObject.assunto = param.assunto;
       jsonObject.tematica = param.tematica;
       jsonObject.layout = param.layout;
       
+      const templateCreated = await this.templateModel.create({
+        level: param.ano,
+        subject: param.assunto,
+        theme: param.tematica,
+        layout: param.layout,
+        html: html ? html[1].trim(): '',
+        user_id: user_id
+      } as CreateTemplateDto)
+      
+      const $ = cheerio.load(html ? html[1].trim(): '');
+      
+      const imgElements = $('img').toArray();
+      
+      for (const element of imgElements) {
+        const alt = $(element).attr('alt');
+        if (alt) {
+          try {
+            const response = await this.openai.images.generate({
+              model: "dall-e-3",
+              prompt: imgPrompt + alt,
+              size: "1024x1024",
+              n: 1,
+            });
+            const imageUrl = response.data[0].url;
+
+            const base64Image = await this.toBase64(imageUrl);
+
+            const image: Image = await this.imageModel.create({
+              template_id: templateCreated.id,
+              imageUrl: base64Image
+            })
+            console.log(image)
+            $(element).attr('src', image.id);
+          } catch (error) {
+            console.error('Erro ao gerar imagem:', error);
+          }
+        }
+      }
+
+      const newHtml = $.html().toString();
+
+      console.log(newHtml)
+
+      await this.templateModel.findByIdAndUpdate(templateCreated.id, 
+        {...templateCreated, html: newHtml},
+        { new: true }
+      )
+
       return {
         params: jsonObject,
-        html: html ? html[1].trim() : ''
+        html: newHtml
       };
     }catch (e) {
       console.error(e);
       throw new ServiceUnavailableException('Failed request to ChatGPT');
     }
   }
+
+  async findAll(
+    page: number,
+    limit: number,
+    search: string,
+    theme: string, 
+    subject: string, 
+    level: string,
+    orderBy: string,
+    order: 'asc' | 'desc',
+  ) {
+    
+    const query = this.templateModel.find();
+    const totalItems = await this.templateModel.countDocuments(query.getFilter());
+
+    if (theme) {
+      query.where('theme').equals(theme); 
+    }
+
+    if (subject) {
+      query.where('subject').equals(subject); 
+    }
+
+    if (level) {
+      query.where('level').equals(level); 
+    }
+
+    
+    if (search) {
+      query.or([
+        { level: { $regex: search, $options: 'i' } },
+        { subject: { $regex: search, $options: 'i' } },
+      ]);
+    }
+
+    
+    if (orderBy) {
+      const sortOption = order === 'desc' ? -1 : 1;
+      query.sort({ [orderBy]: sortOption });
+    }
+
+    query.skip((page - 1) * limit).limit(limit);
+
+    
+    const items = await query.exec();
+
+    return {
+      totalItems,
+      items,
+      page,
+      limit,
+    };
+  }
+
+  async toBase64(url: string) {
+
+    const response = await axios.get(url, { responseType: 'arraybuffer' });
+    const base64Image = Buffer.from(response.data);
+
+    return base64Image;
+    }
 }
