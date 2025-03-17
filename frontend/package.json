@@ -18,11 +18,17 @@
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "framer-motion": "^11.13.5",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
+    "html-react-parser": "^5.2.2",
     "next": "15.1.0",
+    "nookies": "^2.5.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-draggable": "^4.4.6",
-    "react-resizable": "^3.0.5"
+    "react-movable": "^3.4.1",
+    "react-resizable": "^3.0.5",
+    "react-toastify": "^11.0.5"
   },
   "devDependencies": {
     "@types/node": "^20",

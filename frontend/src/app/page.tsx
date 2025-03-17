@@ -1,6 +1,9 @@
 'use client'
+import { useContext } from "react";
 import background from "../assets/img/background.jpg"
 import { useRouter } from 'next/navigation'
+import { AuthContext } from "@/context/AuthContext";
+import { GetServerSideProps } from "next";
 
 const backgroundStyle = {
   backgroundImage: `url(${background.src})`,
@@ -12,6 +15,16 @@ const backgroundStyle = {
 
 export default function Home() {
   const router = useRouter();
+
+  const { isAuthenticated } = useContext(AuthContext);
+
+  const handleStartClick = () => {
+    if (isAuthenticated) {
+      router.push("/form");
+    } else {
+      router.push("/login");
+    }
+  }
   
   return (
     <div style={backgroundStyle} className="flex justify-center items-center">
@@ -22,7 +35,7 @@ export default function Home() {
           <span>Customize each activity by selecting the topic, learning objectives and the student's grade level.</span>
         </div>
         <div className="flex gap-4">
-          <button onClick={() => router.push('/form')} className="w-48 h-14 px-6 text-base bg-[#87CEEB] rounded-lg font-semibold">
+          <button onClick={handleStartClick} className="w-48 h-14 px-6 text-base bg-[#87CEEB] rounded-lg font-semibold">
             Start
           </button>
           <button className="self-center w-48 h-14 px-6 text-base bg-[#87CEEB] rounded-lg font-semibold" type="submit">
@@ -33,3 +46,18 @@ export default function Home() {
     </div>
   );
 }
+
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   const { isAuthenticated } = useContext(AuthContext);
+  
+//   if (!isAuthenticated) {
+//     return {
+//       redirect: {
+//         destination: "/login",
+//         permanent: false,
+//       },
+//     };
+//   }
+
+//   return { props: {} };
+// }
