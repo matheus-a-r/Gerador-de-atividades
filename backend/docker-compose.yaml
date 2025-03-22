@@ -10,19 +10,11 @@ services:
     volumes:
       - .:/app
       - /app/node_module
-    networks:
-      - app-network
 
   mongo:
     image: mongo:latest
     ports:
       - "27019:27017"
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
 
 volumes:
   mongo-data:

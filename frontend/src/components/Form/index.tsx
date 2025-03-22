@@ -36,8 +36,8 @@ export default function Form(props: Props) {
         setLoading(true)
 
         try {
-            // const response = await generateTemplate(formDataRequest)
-            // if (response.status === 201) {
+            const response = await generateTemplate(formDataRequest)
+            if (response && response.status === 201) {
                 const mock = {
                     "params": {
                         "task": "The objective of this activity is for the student to calculate the total number of fruits Sam has by adding the given values together.",
@@ -47,11 +47,31 @@ export default function Form(props: Props) {
                         "assunto": "addition and logic",
                         "tematica": "Fruits"
                     },
-                    "html": "<html><head></head><body><div style=\"width: 800px; border: solid 1px; padding: 10px; text-align: center;\" exp=\"This div acts as the main container for the activity. It sets a fixed width of 800px with padding for spacing inside and centers the content.\">\n      <div class=\"activity\" style=\"width: 100%;\">\n        <p exp=\"This paragraph provides a clear description of the task. The student needs to calculate the total number of fruits based on the given numbers.\">\n          Sam collected 35 bananas and 27 apples. How many fruits does he have in total?\n        </p>\n\n        <div style=\"display: flex; justify-content: center; margin-bottom: 20px;\" exp=\"This section contains an illustration related to the problem to make the activity more engaging for the student.\">\n          <img src=\"67d0d26909f176633a7f8cb9\" alt=\"Illustration of Sam holding a bunch of 35 bananas and a basket with 27 apples.\" style=\"width: 300px; height: auto;\" exp=\"This image visually represents the scenario where Sam has collected both bananas and apples, prompting the student to add them together.\">\n        </div>\n\n        <p>Write the total number of fruits in the box below:</p>\n        <div style=\"width: 100px; height: 100px; border: 1px solid black; margin: 10px auto;\" exp=\"This box is centered and used for the student to write the total number of fruits. The correct answer is 62.\">\n        </div>\n      </div>\n    </div></body></html>"
+                    "html": `<html><head></head><body><div class="container" exp="This div acts as the main container for the activity. It sets a fixed width of 800px with padding for spacing inside.">
+      <div class="activity">
+        <p exp="This paragraph provides a clear description of the task. The student needs to divide the total number of puppies among the child's friends and express the result as a whole number.">
+          A child is taking care of 9 puppies. She wants to give all the puppies to her friends. Solve the division problems below and write the number of puppies each friend will receive as a whole number.
+        </p>
+
+        <div class="image" exp="This section contains an image related to the problem context.">
+          <img src="67d845debd40807a295a5c3f" alt="Illustration of a child with 9 puppies, representing a division problem." style="width: 400px; height: auto;" exp="This image visually represents the scenario described in the problem, helping students contextualize the activity.">
+        </div>
+
+        <div class="question" exp="This section contains the first question about dividing the puppies among 4 friends.">
+          <p> A child with 9 puppies wants to give them all to 4 friends. How many puppies will each friend receive? Write the result as a whole number.</p>
+          <p style="border: 1px solid black; padding: 5px;" exp="Box where the student writes the answer. The correct answer is '2 puppies for each friend.'"></p>
+        </div>
+
+        <div class="question" exp="This section contains the second question about dividing the puppies among 3 friends.">
+          <p>Now, instead of 4 friends, the child decides to give the 9 puppies to 3 friends. How many puppies will each friend receive? Write the result as a whole number.</p>
+          <p style="border: 1px solid black; padding: 5px;" exp="Box where the student writes the answer. The correct answer is '3 puppies for each friend.'"></p>
+        </div>
+      </div>
+    </div></body></html>`
                 }
-                setResponseData(mock)
+                setResponseData(response.data)
                 setLoading(false)
-            // }
+            }
         } catch (error: any) {
             console.log(error)
         }
@@ -73,8 +93,8 @@ export default function Form(props: Props) {
         setLoading(true)
         
         try {
-            // const response = await generateTemplate(formDataRequest)
-            // if (response.status === 201) {
+            const response = await generateTemplate(formDataRequest)
+            if (response && response.status === 201) {
                 const mock = {
                     "params": {
                         "task": "The objective of this activity is for the student to calculate the total number of fruits Sam has by adding the given values together.",
@@ -84,10 +104,30 @@ export default function Form(props: Props) {
                         "assunto": "addition and logic",
                         "tematica": "Fruits"
                     },
-                    "html": "<html><head></head><body><div style=\"width: 800px; border: solid 1px; padding: 10px; text-align: center;\" exp=\"This div acts as the main container for the activity. It sets a fixed width of 800px with padding for spacing inside and centers the content.\">\n      <div class=\"activity\" style=\"width: 100%;\">\n        <p exp=\"This paragraph provides a clear description of the task. The student needs to calculate the total number of fruits based on the given numbers.\">\n          Sam collected 35 bananas and 27 apples. How many fruits does he have in total?\n        </p>\n\n        <div style=\"display: flex; justify-content: center; margin-bottom: 20px;\" exp=\"This section contains an illustration related to the problem to make the activity more engaging for the student.\">\n          <img src=\"67d0d26909f176633a7f8cb9\" alt=\"Illustration of Sam holding a bunch of 35 bananas and a basket with 27 apples.\" style=\"width: 300px; height: auto;\" exp=\"This image visually represents the scenario where Sam has collected both bananas and apples, prompting the student to add them together.\">\n        </div>\n\n        <p>Write the total number of fruits in the box below:</p>\n        <div style=\"width: 100px; height: 100px; border: 1px solid black; margin: 10px auto;\" exp=\"This box is centered and used for the student to write the total number of fruits. The correct answer is 62.\">\n        </div>\n      </div>\n    </div></body></html>"
+                    "html": `<html><head></head><body><div class="container" exp="This div acts as the main container for the activity. It sets a fixed width of 800px with padding for spacing inside.">
+      <div class="activity">
+        <p exp="This paragraph provides a clear description of the task. The student needs to divide the total number of puppies among the child's friends and express the result as a whole number.">
+          A child is taking care of 9 puppies. She wants to give all the puppies to her friends. Solve the division problems below and write the number of puppies each friend will receive as a whole number.
+        </p>
+
+        <div class="image" exp="This section contains an image related to the problem context.">
+          <img src="67d845debd40807a295a5c3f" alt="Illustration of a child with 9 puppies, representing a division problem." style="width: 400px; height: auto;" exp="This image visually represents the scenario described in the problem, helping students contextualize the activity.">
+        </div>
+
+        <div class="question" exp="This section contains the first question about dividing the puppies among 4 friends.">
+          <p> A child with 9 puppies wants to give them all to 4 friends. How many puppies will each friend receive? Write the result as a whole number.</p>
+          <p style="border: 1px solid black; padding: 5px;" exp="Box where the student writes the answer. The correct answer is '2 puppies for each friend.'"></p>
+        </div>
+
+        <div class="question" exp="This section contains the second question about dividing the puppies among 3 friends.">
+          <p>Now, instead of 4 friends, the child decides to give the 9 puppies to 3 friends. How many puppies will each friend receive? Write the result as a whole number.</p>
+          <p style="border: 1px solid black; padding: 5px;" exp="Box where the student writes the answer. The correct answer is '3 puppies for each friend.'"></p>
+        </div>
+      </div>
+    </div></body></html>`
                 }
-                setResponseData(mock)
-            // }
+                setResponseData(response.data);
+            }
             setIsSubmitted(true);
         } catch (error: any) {
             console.log(error)

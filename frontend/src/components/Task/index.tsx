@@ -1,5 +1,6 @@
 import { ResponseTemplate } from "@/types";
 import { useEffect, useRef, useState } from "react";
+import React from "react";
 import Element from "../element";
 import Draggable from "react-draggable";
 import { getImageById, updateImageById } from "@/api/image";
@@ -25,6 +26,7 @@ type Tags = {
 }
 
 export default function Task(props: Props) {
+    const nodeRefs = useRef<Record<number, any>>({});
     const { data, ref } = props;
 
     const [html, setHtml] = useState<Tags[]>([]);
@@ -56,6 +58,24 @@ export default function Task(props: Props) {
             document.removeEventListener("mouseup", stopResize);
         };
     }, [isResizing]);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if(isResizing) return;
+            if (e.key === "Delete" && selectedItem !== undefined && selectedItem !== null) {
+                setHtml(prev => prev.filter((_, idx) => idx !== selectedItem));
+                setSizes(prev => prev.filter((_, idx) => idx !== selectedItem));
+                setOriginalSizes(prev => prev.filter((_, idx) => idx !== selectedItem));
+                setResized(prev => prev.filter((_, idx) => idx !== selectedItem));
+                setSelectedItem(undefined);
+            }
+        };
+    
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [selectedItem, isResizing, html, sizes, originalSizes, resized]);
 
     const handleContextMenu = (e) => {
         e.preventDefault();
@@ -316,10 +336,14 @@ export default function Task(props: Props) {
     return (
         <div ref={ref} className="flex w-full max-w-6xl" onMouseLeave={stopResize}>
             <div className="flex flex-col gap-8 w-full">
-            {html && html.map((elemento, index) => (
-                <Draggable key={index} nodeRef={nodeRef} disabled={isResizing}>
+            {html && html.map((elemento, index) => {
+                if (!nodeRefs.current[index]) {
+                    nodeRefs.current[index] = React.createRef<HTMLDivElement>();
+                }
+
+                return (<Draggable key={index} nodeRef={nodeRefs.current[index]}>
                     <div
-                    ref={nodeRef}
+                    ref={nodeRefs.current[index]}
                     className={`w-full group p-2 cursor-pointer hover:border hover:border-black hover:box-border 
                         ${index === selectedItem ? "border border-black box-border" : ""}`}
                     style={resized[index] ? { width: `${sizes[index]?.width}px`, height: `${sizes[index]?.height}px` } : {width: originalSizes[index].width, height: originalSizes[index].height}}
@@ -394,7 +418,7 @@ export default function Task(props: Props) {
                     ></div>
                     </div>
                 </Draggable>
-                ))}
+            )})}
             </div>
         </div>
     )
