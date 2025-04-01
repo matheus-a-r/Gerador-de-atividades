@@ -59,6 +59,7 @@ export function AuthProvider({ children }: any) {
 
     async function logout() {
         await exit();
+        router.push("/");
     }
 
     return (

@@ -5,6 +5,7 @@ import Refresh from "../../assets/img/refresh-cw.svg";
 import { div } from "framer-motion/client";
 import { FormDataRequest } from "@/types";
 import { generateTemplate } from "@/api/template";
+import Loading from "../loading";
 
 type Props = {
     setIsSubmitted: any
@@ -12,20 +13,21 @@ type Props = {
     responseData: any
     setLoading: any
     setResponseData: any
+    loading: boolean
 }
 
 export default function Form(props: Props) {
-    const { isSubmitted, responseData, setIsSubmitted, setLoading, setResponseData} = props;
+    const { loading, isSubmitted, responseData, setIsSubmitted, setLoading, setResponseData } = props;
 
     const [values, setValues] = useState({
         ano: "",
         assunto: "",
-        tematica:  "",
+        tematica: "",
         layout: ""
     });
 
     const regen = async () => {
-        
+
         const formDataRequest: FormDataRequest = {
             ano: responseData?.params.ano,
             assunto: responseData?.params.assunto,
@@ -79,19 +81,19 @@ export default function Form(props: Props) {
             setLoading(false)
         }
     }
-    
+
     const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
+
         const formDataRequest: FormDataRequest = {
             ano: values.ano,
             assunto: values.assunto,
             tematica: values.tematica,
             layout: values.layout
         };
-        
+
         setLoading(true)
-        
+
         try {
             const response = await generateTemplate(formDataRequest)
             if (response && response.status === 201) {
@@ -139,18 +141,18 @@ export default function Form(props: Props) {
 
     const getHandler = (name: string) => {
         return (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValues({ ...values, [name]: event.target.value });
+            setValues({ ...values, [name]: event.target.value });
         };
-      };
+    };
 
     return (
         <Template>
             <div className="">
                 <div className="flex flex-col justify-center items-center gap-8">
                     {!isSubmitted ?
-                    <span className="text-3xl font-extrabold">Enter the parameters</span>
-                    :
-                    <span className="text-3xl font-extrabold">Task summary</span>
+                        <span className="text-3xl font-extrabold text-black">Enter the parameters</span>
+                        :
+                        <span className="text-3xl font-extrabold text-black">Task summary</span>
                     }
                     <form
                         onSubmit={onSubmit}
@@ -159,53 +161,53 @@ export default function Form(props: Props) {
                             {!isSubmitted ? (
                                 <div className="flex flex-col gap-4">
                                     <div className="flex flex-col">
-                                        <label htmlFor="ano">Grade level</label>
+                                        <label htmlFor="ano" className="text-black">Grade level</label>
                                         <input
                                             className="p-4 w-72 bg-gray-100 rounded-lg"
                                             name="ano"
                                             placeholder="2nd year elementary school"
                                             type="text"
                                             required
-                                            value={values.ano} 
+                                            value={values.ano}
                                             onChange={getHandler('ano')}
                                         />
                                     </div>
 
                                     <div className="flex flex-col">
-                                        <label htmlFor="assunto">Subject</label>
+                                        <label htmlFor="assunto" className="text-black">Subject</label>
                                         <input
                                             className="p-4 w-72 bg-gray-100 rounded-lg"
                                             name="assunto"
                                             placeholder="Addition and Logic"
                                             type="text"
                                             required
-                                            value={values.assunto} 
+                                            value={values.assunto}
                                             onChange={getHandler('assunto')}
                                         />
                                     </div>
 
                                     <div className="flex flex-col">
-                                        <label htmlFor="tematica">Theme</label>
+                                        <label htmlFor="tematica" className="text-black">Theme</label>
                                         <input
                                             className="p-4 w-72 bg-gray-100 rounded-lg"
                                             name="tematica"
                                             placeholder="Fruits"
                                             type="text"
                                             required
-                                            value={values.tematica} 
+                                            value={values.tematica}
                                             onChange={getHandler('tematica')}
                                         />
                                     </div>
 
                                     <div className="flex flex-col">
-                                        <label htmlFor="tematica">Layout</label>
+                                        <label htmlFor="tematica" className="text-black">Layout</label>
                                         <input
                                             className="p-4 w-72 bg-gray-100 rounded-lg"
                                             name="layout"
                                             placeholder="Two images"
                                             type="text"
                                             required
-                                            value={values.layout} 
+                                            value={values.layout}
                                             onChange={getHandler('layout')}
                                         />
                                     </div>
@@ -235,22 +237,27 @@ export default function Form(props: Props) {
                                 </div>
                             )}
                             {
-                                !isSubmitted ?
-                                    <button className="self-center w-48 h-14 px-6 text-base bg-[#87CEEB] rounded-lg font-semibold" type="submit">
-                                        Submit
-                                    </button>
-                                    :
-                                    <div className="flex gap-4 self-center">
-                                        <button className="self-center w-48 h-14 px-6 text-base bg-[#87CEEB] rounded-lg font-semibold flex justify-center items-center gap-2" 
-                                            onClick={() => regen()}>
-                                            <Image src={Refresh} alt="regen" />
-                                            Regen
-                                        </button>
-                                        <button className="self-center w-48 h-14 px-6 text-base bg-[#87CEEB] rounded-lg font-semibold flex justify-center items-center gap-2" 
-                                                onClick={() => setIsSubmitted(false)}>
-                                            Change Params
-                                        </button>
+                                loading ?
+                                    <div className="self-center">
+                                        <Loading />
                                     </div>
+                                    :
+                                    !isSubmitted ?
+                                        <button className="self-center w-48 h-14 px-6 text-base bg-[#87CEEB] rounded-lg font-semibold" type="submit">
+                                            Submit
+                                        </button>
+                                        :
+                                        <div className="flex gap-4 self-center">
+                                            <button className="self-center w-48 h-14 px-6 text-base bg-[#87CEEB] rounded-lg font-semibold flex justify-center items-center gap-2"
+                                                onClick={() => regen()}>
+                                                <Image src={Refresh} alt="regen" />
+                                                Regen
+                                            </button>
+                                            <button className="self-center w-48 h-14 px-6 text-base bg-[#87CEEB] rounded-lg font-semibold flex justify-center items-center gap-2"
+                                                onClick={() => setIsSubmitted(false)}>
+                                                Change Params
+                                            </button>
+                                        </div>
                             }
                         </div>
                     </form>

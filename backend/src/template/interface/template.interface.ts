@@ -26,5 +26,11 @@ export class Template {
 
     @ApiProperty({ description: 'User id', example: '1' })
     @IsNotEmpty()
-    user_id: string
+    user_id: string;
+
+    @ApiProperty({ description: 'Number of task likes', example: '1' })
+    likes: number;
+
+    @ApiProperty({ description: 'Number of task dislikes', example: '1' })
+    dislikes: number;
 }

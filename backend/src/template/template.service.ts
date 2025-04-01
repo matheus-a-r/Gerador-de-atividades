@@ -1,4 +1,4 @@
-import { Injectable, ServiceUnavailableException  } from '@nestjs/common';
+import { Injectable, NotFoundException, ServiceUnavailableException  } from '@nestjs/common';
 import OpenAIApi from 'openai';
 import { ChatCompletion } from 'openai/resources';
 import { params } from './types';
@@ -73,7 +73,9 @@ export class TemplateService {
         theme: param.tematica,
         layout: param.layout,
         html: html ? html[1].trim(): '',
-        user_id: user_id
+        user_id: user_id,
+        likes: 0,
+        dislikes: 0
       } as CreateTemplateDto)
       
       const $ = cheerio.load(html ? html[1].trim(): '');
@@ -129,29 +131,26 @@ export class TemplateService {
     page: number,
     limit: number,
     search: string,
-    theme: string, 
-    subject: string, 
-    level: string,
+    theme: string[], 
+    subject: string[], 
+    level: string[],
     orderBy: string,
     order: 'asc' | 'desc',
   ) {
-    
     const query = this.templateModel.find();
-    const totalItems = await this.templateModel.countDocuments(query.getFilter());
-
-    if (theme) {
-      query.where('theme').equals(theme); 
-    }
-
-    if (subject) {
-      query.where('subject').equals(subject); 
-    }
-
-    if (level) {
-      query.where('level').equals(level); 
-    }
-
     
+    if (theme && theme.length > 0) {
+      query.where('theme').in(theme);
+    }
+
+    if (subject && subject.length > 0) {
+      query.where('subject').in(subject);
+    }
+
+    if (level && level.length > 0) {
+      query.where('level').in(level);
+    }
+
     if (search) {
       query.or([
         { level: { $regex: search, $options: 'i' } },
@@ -159,14 +158,14 @@ export class TemplateService {
       ]);
     }
 
-    
     if (orderBy) {
       const sortOption = order === 'desc' ? -1 : 1;
       query.sort({ [orderBy]: sortOption });
     }
 
+    const totalItems = await this.templateModel.countDocuments(query.getFilter());
+    
     query.skip((page - 1) * limit).limit(limit);
-
     
     const items = await query.exec();
 
@@ -184,5 +183,45 @@ export class TemplateService {
     const base64Image = Buffer.from(response.data);
 
     return base64Image;
-    }
+  }
+
+  async getFilters(){
+    const themes = await this.templateModel.distinct('theme');
+    const subjects = await this.templateModel.distinct('subject');
+    const levels = await this.templateModel.distinct('level');
+
+    return { themes, subjects, levels };
+  }
+
+  async likeTemplate(id: string){
+
+    const template = await this.templateModel.findById(id);
+
+    if(!template) throw new NotFoundException('Task not found');
+
+    const likes = template.likes + 1 
+
+    template.likes = likes;
+
+    template.save()
+
+    return template
+
+  }
+
+  async deslikeTemplate(id: string){
+
+    const template = await this.templateModel.findById(id);
+
+    if(!template) throw new NotFoundException('Task not found');
+
+    const dislikes = template.dislikes + 1
+
+    template.dislikes = dislikes;
+
+    template.save()
+
+    return template
+
+  }
 }

@@ -3,7 +3,6 @@ import { api } from "./api";
 
 import { UserFormState, SignInRequestData } from "../types"
 
-import router from "next/router";
 import { destroyCookie, parseCookies, setCookie } from "nookies";
 import { toast } from "react-toastify";
 
@@ -28,7 +27,6 @@ export async function logOut() {
     await api.post('auth/logout')
     destroyCookie(null, "nextauth.accessToken");
     destroyCookie(null, "nextauth.refreshToken");
-    router.push("/");
   } catch (error: any) {
     console.log(error.message)
   }

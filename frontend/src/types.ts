@@ -4,6 +4,19 @@ type jsonParams = {
   layout: string
 }
 
+export type Task = {
+    _id: string;
+    level: string;
+    subject: string;
+    theme: string;
+    layout: string;
+    html: string;
+    user_id: string;
+    likes: number;
+    dislikes:number
+}
+
+
 export type ResponseTemplate = {
 html: string;
 style: string;
